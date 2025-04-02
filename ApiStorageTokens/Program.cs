@@ -1,16 +1,28 @@
+using ApiStorageTokens.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddTransient<ServiceSasToken>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
 }
+
+app.MapOpenApi();
+
+app.UseSwaggerUI(
+    options =>
+    {
+        options.RoutePrefix = "";
+        options.SwaggerEndpoint("/openapi/v1.json", "ApiStorageTokens v1");
+    });
+
 
 app.UseHttpsRedirection();
 
@@ -32,6 +44,28 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+
+app.MapGet("/otro", () =>
+{
+    return "Hola mundo!";
+})
+.WithName("otro");
+
+app.MapGet("/testing", () =>
+{
+    return "Testing!";
+});
+
+app.MapGet("/parametros/{dato}", (string dato) =>
+{
+    return $"Dato recibido: {dato}";
+});
+
+app.MapGet("/token/{curso}", (string curso, ServiceSasToken service) =>
+{
+    return service.GenerateToken(curso);
+});
 
 app.Run();
 
